@@ -91,7 +91,7 @@ object DataSources extends App {
 
   // Reading from a remote DB
   val driver = "org.postgresql.Driver"
-  val url = "jdbc:postgresql://localhost:5432/rtjvm"
+  val url = "jdbc:postgresql://localhost:5432/scala_essential"
   val user = "docker"
   val password = "docker"
 
