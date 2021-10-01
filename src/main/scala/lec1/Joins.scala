@@ -21,11 +21,13 @@ object Joins extends App {
   val bandsDF = spark.read
     .option("inferSchema", "true")
     .json("src/main/resources/data/bands.json")
+    .withColumnRenamed("id", "band_id")
 
   // inner joins
-  val joinCondition = guitaristsDF.col("band") === bandsDF.col("id")
+  val joinCondition = guitaristsDF.col("band") === bandsDF.col("band_id")
   val guitaristsBandsDF = guitaristsDF.join(bandsDF, joinCondition, "inner")
 
+  guitaristsBandsDF.select(col("id"))
   // outer joins
   // left outer = everything in the inner join + all the rows in the LEFT table, with nulls in where the data is missing
   guitaristsDF.join(bandsDF, joinCondition, "left_outer")

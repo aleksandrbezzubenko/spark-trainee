@@ -9,6 +9,7 @@ object Aggregations extends App {
     .appName("Aggregations and Grouping")
     .config("spark.master", "local")
     .getOrCreate()
+  spark.sparkContext.setLogLevel("WARN")
 
   val moviesDF = spark.read
     .option("inferSchema", "true")
@@ -17,6 +18,7 @@ object Aggregations extends App {
 
   // counting
   val genresCountDF = moviesDF.select(count(col("Major_Genre"))) // all the values except null
+  genresCountDF.show
   moviesDF.selectExpr("count(Major_Genre)")
 
   // counting all
@@ -46,21 +48,24 @@ object Aggregations extends App {
     stddev(col("Rotten_Tomatoes_Rating"))
   )
 
-  // Grouping
-
+//  // Grouping
+//
   val countByGenreDF = moviesDF
     .groupBy(col("Major_Genre")) // includes null
     .count()  // select count(*) from moviesDF group by Major_Genre
 
+  countByGenreDF.show
+//
   val avgRatingByGenreDF = moviesDF
     .groupBy(col("Major_Genre"))
     .avg("IMDB_Rating")
-
+//
   val aggregationsByGenreDF = moviesDF
     .groupBy(col("Major_Genre"))
     .agg(
       count("*").as("N_Movies"),
       avg("IMDB_Rating").as("Avg_Rating")
-    )
-    .orderBy(col("Avg_Rating"))
+    ).orderBy(col("Avg_Rating"))
+
+  aggregationsByGenreDF.show
 }
