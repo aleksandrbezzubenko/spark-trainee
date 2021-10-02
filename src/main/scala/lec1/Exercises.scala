@@ -46,7 +46,12 @@ object Exercises {
    * Exercises
    *
    * 1. show all employees and their max salary
+   *    (employees from joins/employees and salaries form joins/salaries)
+   *    note that in salaries may be more than 1 salary for employee -> take the biggest(before join make a group by on salaries)
    * 2. show all employees who were never managers
+   *    employees from joins/employees and info about managers from joins/dept_manager.
+   *    Show all employees that are not exist in table joins/dept_manager
    * 3. find the job titles of the best paid 10 employees in the company
+   *    title from joins/titles take the latest title(may need to group by and max by to_date)
    */
 }
