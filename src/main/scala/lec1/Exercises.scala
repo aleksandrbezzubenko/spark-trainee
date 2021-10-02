@@ -1,6 +1,10 @@
 package lec1
 
-object Exercises {
+import org.apache.spark.sql.{DataFrame, Row, SaveMode, SparkSession}
+
+object Exercises extends App {
+
+  System.setProperty("hadoop.home.dir", "C:\\Program Files (x86)\\hadoop")
 
   // Basics
   /**
@@ -16,12 +20,65 @@ object Exercises {
    *   - count the number of rows, call count()
    */
 
+  //1
+  val spark: SparkSession = SparkSession.builder()
+    .appName("DataFrames Exercises")
+    .config("spark.master", "local")
+    .getOrCreate()
+
+  spark.sparkContext.setLogLevel("WARN")
+
+  // create DF from tuples
+  val smartphones = Seq(
+    ("iphone", "5s", 4, 8),
+    ("samsung", "galaxy s5", 5, 12),
+    ("xiaomi", "redmi 5a", 5, 8),
+    ("iphone", "6s", 5, 12),
+    ("realme", "6s", 6, 48),
+    ("sony", "xperia Z3", 5, 21),
+    ("samsung", "galaxy a5", 5, 12),
+    ("iphone", "7", 5, 12),
+    ("nokia", "3310", 2, 0),
+    ("iphone", "X", 6, 12)
+  )
+
+  import spark.implicits._
+
+  val manualSmartphonesDFWithImplicits = smartphones.toDF("Make", "Model", "Screen dimension", "Camera megapixels")
+
+  manualSmartphonesDFWithImplicits.show()
+
+  // 2
+
+  val movies = spark.read
+    .format("json")
+    .option("inferSchema", "true")
+    .load("src/main/resources/data/movies.json")
+
+  movies.printSchema()
+  println(movies.count())
+
+
+
   /**
    * Exercise: read the movies DF, then write it as
    * - tab-separated values file CSV \t
    * - snappy Parquet
    * - table "public.movies" in the Postgres DB / json
    */
+
+  val moviesDF = spark.read
+      .format("json")
+      .option("inferSchema", "true")
+      .load("src/main/resources/data/movies.json")
+
+  moviesDF.coalesce(1).write
+    .mode(SaveMode.Overwrite)
+    .csv("src/main/resources/data/movies_duplicate")
+//    .format("com.databricks.spark.csv")
+//    .option("inferSchema", "true")
+//    .option("header", "true")
+
 
   /**
    * Exercises
