@@ -29,6 +29,8 @@ object Joins extends App {
 
   guitaristsBandsDF.select(col("id"))
   // outer joins
+  // DF guitarists: band: 1, 2, 3, 4
+  // DF bands: band_id: 1, 3, 5
   // left outer = everything in the inner join + all the rows in the LEFT table, with nulls in where the data is missing
   guitaristsDF.join(bandsDF, joinCondition, "left_outer")
 

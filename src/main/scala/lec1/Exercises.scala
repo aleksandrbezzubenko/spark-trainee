@@ -1,6 +1,15 @@
 package lec1
 
+import org.apache.spark.sql.SparkSession
+
 object Exercises {
+
+  val spark: SparkSession = SparkSession.builder()
+    .appName("DataFrames Exercises")
+    .config("spark.master", "local")
+    .getOrCreate()
+
+  spark.sparkContext.setLogLevel("WARN")
 
   // Basics
   /**
@@ -15,6 +24,35 @@ object Exercises {
    *   - print its schema
    *   - count the number of rows, call count()
    */
+
+
+    // create DF from tuples
+    val smartphones = Seq(
+      ("iphone", "5s", 4, 8),
+      ("samsung", "galaxy s5", 5, 12),
+      ("xiaomi", "redmi 5a", 5, 8),
+      ("iphone", "6s", 5, 12),
+      ("realme", "6s", 6, 48),
+      ("sony", "xperia Z3", 5, 21),
+      ("samsung", "galaxy a5", 5, 12),
+      ("iphone", "7", 5, 12),
+      ("nokia", "3310", 2, 0),
+      ("iphone", "X", 6, 12)
+    )
+
+  import spark.implicits._
+
+  val manualSmartphonesDFWithImplicits = smartphones.toDF("Make", "Model", "Screen dimension", "Camera megapixels")
+  manualSmartphonesDFWithImplicits.show()
+
+
+  val movies = spark.read
+    .format("json")
+    .option("inferSchema", "true")
+    .load("src/main/resources/data/movies.json")
+
+    movies.printSchema()
+    println(movies.count())
 
   /**
    * Exercise: read the movies DF, then write it as
