@@ -1,10 +1,11 @@
 package lec1
 
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, Row, SaveMode, SparkSession}
 
 object Exercises extends App {
 
-  System.setProperty("hadoop.home.dir", "C:\\Program Files (x86)\\hadoop")
+  System.setProperty("hadoop.home.dir", "C:\\hadoop")
 
   // Basics
   /**
@@ -28,35 +29,35 @@ object Exercises extends App {
 
   spark.sparkContext.setLogLevel("WARN")
 
-  // create DF from tuples
-  val smartphones = Seq(
-    ("iphone", "5s", 4, 8),
-    ("samsung", "galaxy s5", 5, 12),
-    ("xiaomi", "redmi 5a", 5, 8),
-    ("iphone", "6s", 5, 12),
-    ("realme", "6s", 6, 48),
-    ("sony", "xperia Z3", 5, 21),
-    ("samsung", "galaxy a5", 5, 12),
-    ("iphone", "7", 5, 12),
-    ("nokia", "3310", 2, 0),
-    ("iphone", "X", 6, 12)
-  )
-
+//  // create DF from tuples
+//  val smartphones = Seq(
+//    ("iphone", "5s", 4, 8),
+//    ("samsung", "galaxy s5", 5, 12),
+//    ("xiaomi", "redmi 5a", 5, 8),
+//    ("iphone", "6s", 5, 12),
+//    ("realme", "6s", 6, 48),
+//    ("sony", "xperia Z3", 5, 21),
+//    ("samsung", "galaxy a5", 5, 12),
+//    ("iphone", "7", 5, 12),
+//    ("nokia", "3310", 2, 0),
+//    ("iphone", "X", 6, 12)
+//  )
+//
   import spark.implicits._
-
-  val manualSmartphonesDFWithImplicits = smartphones.toDF("Make", "Model", "Screen dimension", "Camera megapixels")
-
-  manualSmartphonesDFWithImplicits.show()
+//
+//  val manualSmartphonesDFWithImplicits = smartphones.toDF("Make", "Model", "Screen dimension", "Camera megapixels")
+//
+//  manualSmartphonesDFWithImplicits.show()
 
   // 2
 
-  val movies = spark.read
-    .format("json")
-    .option("inferSchema", "true")
-    .load("src/main/resources/data/movies.json")
-
-  movies.printSchema()
-  println(movies.count())
+//  val movies = spark.read
+//    .format("json")
+//    .option("inferSchema", "true")
+//    .load("src/main/resources/data/movies.json")
+//
+//  movies.printSchema()
+//  println(movies.count())
 
 
 
@@ -72,12 +73,20 @@ object Exercises extends App {
       .option("inferSchema", "true")
       .load("src/main/resources/data/movies.json")
 
-  moviesDF.coalesce(1).write
-    .mode(SaveMode.Overwrite)
-    .csv("src/main/resources/data/movies_duplicate")
-//    .format("com.databricks.spark.csv")
-//    .option("inferSchema", "true")
-//    .option("header", "true")
+  //csv
+//  moviesDF.coalesce(1).write
+//    .mode(SaveMode.Overwrite)
+//    .option("sep", "  ")
+//    .csv("src/main/resources/data/movies_duplicate")
+
+  //parquet
+//  moviesDF.write.mode(SaveMode.Overwrite).parquet("src/main/resources/data/movies_parquet")
+
+  //json table
+//  moviesDF.write
+//    .mode(SaveMode.Overwrite)
+//    .format("json")
+//    .save("src/main/resources/data/movies_jstest.json")
 
 
   /**
@@ -90,6 +99,17 @@ object Exercises extends App {
    * Use as many versions as possible
    */
 
+//  //1
+//  moviesDF.select($"Title", $"US_Gross").show
+
+  //2
+//  val totalProfitDF: Unit = moviesDF.withColumn("Total_profit", col("US_Gross")
+//    + col("Worldwide_Gross") + col("US_DVD_Sales")).show
+
+  //3
+//  val comedyAbove6DF: Unit = moviesDF.filter(col("Major_Genre") === "Comedy")
+//  .filter(col("IMDB_Rating") > 6).show
+
   /**
    * Exercises
    *
@@ -98,12 +118,59 @@ object Exercises extends App {
    * 3. Show the mean and standard deviation(stddev) of US gross revenue for the movies
    * 4. Compute the average IMDB rating and the average US gross revenue PER DIRECTOR
    */
+  //1
+//  moviesDF.withColumn("Total_profit", col("US_Gross")
+//    + col("Worldwide_Gross") + col("US_DVD_Sales")).select(sum(col("Total_profit"))).show
+
+  //2
+//  println(moviesDF.select("Director").distinct().count)
+
+  //3
+//  moviesDF.agg(
+//    avg(col("US_Gross")),
+//    stddev(col("US_Gross"))
+//  ).show
+
+  //4
+//  moviesDF.groupBy("Director").agg(
+//    avg("IMDB_Rating"),
+//    avg("US_Gross")
+//  ).show
 
   /**
    * Exercises
    *
    * 1. show all employees and their max salary
+   *    (employees from j and salaries form joins/salaries)
+   *    note that in salaries may be moins/employeesore than 1 salary for employee -> take the biggest(before join make a group by on salaries)
    * 2. show all employees who were never managers
+   *    employees from joins/employees and info about managers from joins/dept_manager.
+   *    Show all employees that are not exist in table joins/dept_manager
    * 3. find the job titles of the best paid 10 employees in the company
+   *    title from joins/titles take the latest title(may need to group by and max by to_date)
    */
+
+  //1
+  val employeesDF = spark.read
+    .option("inferSchema", "true")
+    .parquet("src/main/resources/data/joins/employees")
+  employeesDF.show
+
+  val salariesDF = spark.read
+    .option("inferSchema", "true")
+    .parquet("src/main/resources/data/joins/salaries")
+  salariesDF.show
+
+  val deptManagerDF = spark.read
+    .option("inferSchema", "true")
+    .parquet("src/main/resources/data/joins/dept_manager")
+  deptManagerDF.show
+
+  val titlesDF = spark.read
+    .option("inferSchema", "true")
+    .parquet("src/main/resources/data/joins/titles")
+  titlesDF.show
+
+//  val employeesAndSalariesDF = salariesDF.join(employeesDF, (salariesDF("emp_no") === employeesDF("emp_no")),"outer").show
+
 }
