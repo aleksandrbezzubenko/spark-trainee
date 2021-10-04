@@ -52,9 +52,8 @@ object Exercises extends App {
   // 2
 
 //  val movies = spark.read
-//    .format("json")
 //    .option("inferSchema", "true")
-//    .load("src/main/resources/data/movies.json")
+//    .json("src/main/resources/data/movies.json")
 //
 //  movies.printSchema()
 //  println(movies.count())
@@ -69,14 +68,13 @@ object Exercises extends App {
    */
 
   val moviesDF = spark.read
-      .format("json")
       .option("inferSchema", "true")
-      .load("src/main/resources/data/movies.json")
+      .json("src/main/resources/data/movies.json")
 
   //csv
 //  moviesDF.coalesce(1).write
 //    .mode(SaveMode.Overwrite)
-//    .option("sep", "  ")
+//    .option("sep", "a/ta")
 //    .csv("src/main/resources/data/movies_duplicate")
 
   //parquet
@@ -103,12 +101,11 @@ object Exercises extends App {
 //  moviesDF.select($"Title", $"US_Gross").show
 
   //2
-//  val totalProfitDF: Unit = moviesDF.withColumn("Total_profit", col("US_Gross")
+//  moviesDF.withColumn("Total_profit", col("US_Gross")
 //    + col("Worldwide_Gross") + col("US_DVD_Sales")).show
 
   //3
-//  val comedyAbove6DF: Unit = moviesDF.filter(col("Major_Genre") === "Comedy")
-//  .filter(col("IMDB_Rating") > 6).show
+//  moviesDF.filter(col("Major_Genre") === "Comedy" and col("IMDB_Rating") > 6).show
 
   /**
    * Exercises
@@ -151,26 +148,35 @@ object Exercises extends App {
    */
 
   //1
-  val employeesDF = spark.read
-    .option("inferSchema", "true")
-    .parquet("src/main/resources/data/joins/employees")
-  employeesDF.show
+//  val employeesDF = spark.read
+//    .option("inferSchema", "true")
+//    .parquet("src/main/resources/data/joins/employees")
+//
+//  val salariesDF = spark.read
+//    .option("inferSchema", "true")
+//    .parquet("src/main/resources/data/joins/salaries")
+//
+//  val deptManagerDF = spark.read
+//    .option("inferSchema", "true")
+//    .parquet("src/main/resources/data/joins/dept_manager")
+//
+//  val titlesDF = spark.read
+//    .option("inferSchema", "true")
+//    .parquet("src/main/resources/data/joins/titles")
 
-  val salariesDF = spark.read
-    .option("inferSchema", "true")
-    .parquet("src/main/resources/data/joins/salaries")
-  salariesDF.show
+  //1
+//  val maxSalaryDF = salariesDF
+//    .groupBy("emp_no")
+//    .max("salary")
+//
+//  employeesDF.join(maxSalaryDF, (maxSalaryDF("emp_no") === employeesDF("emp_no")),"left_outer").show
 
-  val deptManagerDF = spark.read
-    .option("inferSchema", "true")
-    .parquet("src/main/resources/data/joins/dept_manager")
-  deptManagerDF.show
+  //2
+//  val menegersDF = deptManagerDF.select("emp_no")
+//  employeesDF.join(menegersDF, (employeesDF("emp_no") === menegersDF("emp_no")), "anti").show
 
-  val titlesDF = spark.read
-    .option("inferSchema", "true")
-    .parquet("src/main/resources/data/joins/titles")
-  titlesDF.show
-
-//  val employeesAndSalariesDF = salariesDF.join(employeesDF, (salariesDF("emp_no") === employeesDF("emp_no")),"outer").show
+  //3
+//  val best10EmployeesDF = maxSalaryDF.sort($"max(salary)".desc).limit(10)
+//  employeesDF.join(best10EmployeesDF, (employeesDF("emp_no") === best10EmployeesDF("emp_no")), "semi").show
 
 }
