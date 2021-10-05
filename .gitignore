@@ -2,4 +2,5 @@
 .bsp
 target
 **/target
-**/project
+project/project
+project/target
