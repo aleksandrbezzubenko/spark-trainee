@@ -1,14 +1,16 @@
 package lec3
 
 import java.sql.Date
-
-import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession, Row}
+import org.apache.spark.sql.{DataFrame, Dataset, Encoders, Row, SparkSession}
 import org.apache.spark.sql.functions._
+
+import scala.math.Ordered.orderingToOrdered
 
 object Datasets extends App {
   val spark = SparkSession.builder()
     .appName("Datasets")
     .config("spark.master", "local")
+    .config("spark.driver.bindAddress", "127.0.0.1")
     .getOrCreate()
 
   val numbersDF: DataFrame = spark.read
@@ -35,7 +37,7 @@ object Datasets extends App {
                   Horsepower: Option[Long],
                   Weight_in_lbs: Long,
                   Acceleration: Double,
-                  Year: Date,
+                  Year: String, //with Date there was an error: cannot convert date to string
                   Origin: String
                 )
 
@@ -66,6 +68,14 @@ object Datasets extends App {
    * 2. Count how many POWERFUL cars we have (HP > 140)
    * 3. Average HP for the entire dataset
    */
+  //1
+  println(carsDS.count)
+
+  //2
+  println(carsDS.filter(_.Horsepower > Some(140)).count)
+
+  //3
+  carsDS.select(avg(col("Horsepower"))).show
 
 
   // Joins
@@ -83,4 +93,8 @@ object Datasets extends App {
    * Exercise: join the guitarsDS and guitarPlayersDS, in an outer join
    * (hint: use array_contains)
    */
+
+  val guitarPlayerGuitarsDS: Dataset[(GuitarPlayer, Guitar)] = guitarPlayersDS.joinWith(guitarsDS, array_contains(guitarPlayersDS.col("guitars"), guitarsDS.col("id")), "outer")
+  guitarPlayerGuitarsDS.show(false)
+
 }
