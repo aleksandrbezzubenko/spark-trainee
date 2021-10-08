@@ -89,12 +89,15 @@ object Datasets extends App {
 
   val guitarPlayerBandsDS: Dataset[(GuitarPlayer, Band)] = guitarPlayersDS.joinWith(bandsDS, guitarPlayersDS.col("band") === bandsDS.col("id"), "inner")
 
+
   /**
    * Exercise: join the guitarsDS and guitarPlayersDS, in an outer join
    * (hint: use array_contains)
    */
 
-  val guitarPlayerGuitarsDS: Dataset[(GuitarPlayer, Guitar)] = guitarPlayersDS.joinWith(guitarsDS, array_contains(guitarPlayersDS.col("guitars"), guitarsDS.col("id")), "outer")
+  val guitarPlayerGuitarsDS: Dataset[(GuitarPlayer, Guitar)] = guitarPlayersDS.joinWith(guitarsDS,
+    array_contains(guitarPlayersDS.col("guitars"), guitarsDS.col("id")), "outer")
+    .withColumnRenamed("_1", "GuitarsPlayers").withColumnRenamed("_2", "Guitars").as[(GuitarPlayer, Guitar)]
   guitarPlayerGuitarsDS.show(false)
 
 }

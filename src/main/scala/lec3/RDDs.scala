@@ -1,6 +1,6 @@
 package lec3
 
-import org.apache.spark.sql.{SparkSession, SaveMode}
+import org.apache.spark.sql.{DataFrame, SparkSession, SaveMode}
 import org.apache.spark.sql.functions._
 
 import scala.io.Source
@@ -104,23 +104,25 @@ object RDDs extends App {
    */
 
   //1
-  case class MoviesValue(Title: String, US_Gross: Long, Worldwide_Gross: Long, US_DVD_Sales: Long,
-                         Production_Budget: Long, Release_Date: String, MPAA_Rating: String,
-                         Running_Time_min: Long, Distributor: String, Source: String, Major_Genre: String,
-                         Creative_Type: String, Director: String, Rotten_Tomatoes_Rating: Double,
-                         IMDB_Rating: Double, IMDB_Votes: Long)
-  val moviesRDD2 = sc.textFile("src/main/resources/data/movies.json")
-    .map(line => line.split(","))
-    .map(tokens => MoviesValue(tokens(0), tokens(1).toLong, tokens(2).toLong,
-      tokens(3).toLong, tokens(4).toLong, tokens(5), tokens(6),
-      tokens(7).toLong, tokens(8), tokens(9), tokens(10), tokens(11), tokens(12),
-      tokens(13).toDouble, tokens(14).toDouble, tokens(15).toLong))
+  val moviesDF = spark.read
+    .option("inferSchema", "true")
+    .json("src/main/resources/data/movies.json")
+  val new_column_names=moviesDF.columns.map(_.toLowerCase())
+  val moviesRDD = moviesDF.toDF(new_column_names:_*).rdd
+  moviesRDD.collect().foreach(println)
 
   //2
-  val rddDist = moviesRDD2.map(_.Major_Genre).distinct()
-  rddDist.collect().foreach(println)
+  val distinctGenresRDD = moviesRDD.map(_(6)).distinct()
+  distinctGenresRDD.collect().foreach(println)
 
   //3
-  val drama6RDD = moviesRDD2.filter(row => row.Major_Genre == "Drama" && row.IMDB_Rating > 6)
+  val drama6RDD = moviesDF.filter(col("Major_Genre") === "Drama" and col("IMDB_Rating") > 6).rdd
+  drama6RDD.collect().foreach(println)
+
+  //4
+  val avgRating = moviesDF.filter(col("IMDB_Rating").isNotNull)
+    .groupBy(col("Major_Genre"))
+    .avg("IMDB_Rating").rdd
+  avgRating.collect().foreach(println)
 
 }
