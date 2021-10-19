@@ -15,11 +15,11 @@ object Exercises extends App {
 
   // 2
   @tailrec
-  def FibonacciFunc(index: Int, prev: Int = 1, current: Int = 0): Int = {
+  def fibonacciFunc(index: Int, prev: Int = 1, current: Int = 0): Int = {
     if (index <= 0) current
-    else FibonacciFunc(index - 1, prev = prev + current, current = prev)
+    else fibonacciFunc(index - 1, prev = prev + current, current = prev)
   }
-  val fib7 = FibonacciFunc(7)
+  val fib7 = fibonacciFunc(7)
 
   // 3
   def isPrime(n: Int): Boolean = {
@@ -63,13 +63,13 @@ object Exercises extends App {
       - if there is a social connection between two people (direct or not)
    */
   class SocialNetwork(val persons: Map[String, Set[String]] = Map()) {
-    def AddPerson(name: String, friends: Set[String] = Set()): SocialNetwork = {
+    def addPerson(name: String, friends: Set[String] = Set()): SocialNetwork = {
       new SocialNetwork(persons + (name -> friends))
     }
-    def Remove(name: String): Map[String, Set[String]] = {
+    def remove(name: String): Map[String, Set[String]] = {
       persons - name
     }
-    def AddFriend(namePerson: String, nameFriend: String): SocialNetwork = {
+    def addFriend(namePerson: String, nameFriend: String): SocialNetwork = {
       if (persons.contains(nameFriend)) {
         new SocialNetwork(persons
           .updated(namePerson, persons(namePerson) + nameFriend)
@@ -81,7 +81,7 @@ object Exercises extends App {
         )
       }
     }
-    def RemoveFriend(namePerson: String, nameFriend: String): SocialNetwork = {
+    def removeFriend(namePerson: String, nameFriend: String): SocialNetwork = {
       if (persons.contains(nameFriend)) {
         new SocialNetwork(persons
           .updated(namePerson, persons(namePerson) - nameFriend)
@@ -92,16 +92,16 @@ object Exercises extends App {
         this
       }
     }
-    def NumberOfFriends(name: String): Int = persons(name).size
-    def MostFriends(): (String, Set[String]) = persons.maxBy(_._2.size)
-    def CountOfNoFriends(): Int = persons.count(_._2.isEmpty)
-    def SocialNoDirectConnection(person1: String, person2: String): Boolean = {
+    def numberOfFriends(name: String): Int = persons(name).size
+    def mostFriends(): (String, Set[String]) = persons.maxBy(_._2.size)
+    def countOfNoFriends(): Int = persons.count(_._2.isEmpty)
+    def socialNoDirectConnection(person1: String, person2: String): Boolean = {
       if (persons(person1).contains(person2)) true
       else {
-        persons(person1).forall(p => SocialNoDirectConnection(p, person2))
+        persons(person1).forall(p => socialNoDirectConnection(p, person2))
       }
     }
-    def SocialConnection(person1: String, person2: String, links: Map[String, Set[String]] = persons): (Boolean, Boolean) = {
+    def socialConnection(person1: String, person2: String, links: Map[String, Set[String]] = persons): (Boolean, Boolean) = {
       if (persons(person2).isEmpty) (false, false)
       else if (persons(person1).contains(person2) && links == persons) (true, true)
       else if (persons(person1).contains(person2) && links != persons) (true, false)
@@ -110,7 +110,7 @@ object Exercises extends App {
         var flag = false
         for (p <- persons(person1)){
           if (newLinks.contains(p)) {
-            if (SocialConnection(p, person2, newLinks)._1) flag = true
+            if (socialConnection(p, person2, newLinks)._1) flag = true
           }
         }
         (flag, false)
@@ -120,22 +120,22 @@ object Exercises extends App {
 
   // Testing Social network
   val socNet = new SocialNetwork()
-    .AddPerson("Sasha")
-    .AddPerson("Denis")
-    .AddPerson("Petr")
-    .AddPerson("Artem")
-    .AddPerson("Mishail")
-    .AddPerson("Anton")
-    .AddPerson("Oleg")
-    .AddPerson("Andrew")
-    .AddPerson("Pavel")
-    .AddFriend("Sasha", "Denis")
-    .AddFriend("Sasha", "Petr")
-    .AddFriend("Sasha", "Artem")
-    .AddFriend("Artem", "Mishail")
-    .AddFriend("Mishail", "Anton")
-  println(socNet.SocialConnection("Sasha", "Anton"))
-  println(socNet.MostFriends())
-  println(socNet.CountOfNoFriends())
+    .addPerson("Sasha")
+    .addPerson("Denis")
+    .addPerson("Petr")
+    .addPerson("Artem")
+    .addPerson("Mishail")
+    .addPerson("Anton")
+    .addPerson("Oleg")
+    .addPerson("Andrew")
+    .addPerson("Pavel")
+    .addFriend("Sasha", "Denis")
+    .addFriend("Sasha", "Petr")
+    .addFriend("Sasha", "Artem")
+    .addFriend("Artem", "Mishail")
+    .addFriend("Mishail", "Anton")
+  println(socNet.socialConnection("Sasha", "Anton"))
+  println(socNet.mostFriends())
+  println(socNet.countOfNoFriends())
 
 }
