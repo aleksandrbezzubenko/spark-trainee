@@ -43,9 +43,7 @@ object Exercises extends App {
   // 1
   val concatenate2 = (str1: String, str2: String) => str1 + str2
   // 2
-  def multVal(value1: Int): Int => Int = {
-    (value2: Int) => value1 * value2
-  }
+  def multVal(value1: Int): Int => Int = (value2: Int) => value1 * value2
   val mult = multVal(3)
   val mult1 = mult(5)
 
@@ -63,24 +61,24 @@ object Exercises extends App {
       - if there is a social connection between two people (direct or not)
    */
   class SocialNetwork(val persons: Map[String, Set[String]] = Map()) {
+
     def addPerson(name: String, friends: Set[String] = Set()): SocialNetwork = {
       new SocialNetwork(persons + (name -> friends))
     }
-    def remove(name: String): Map[String, Set[String]] = {
-      persons - name
+
+    def remove(name: String): SocialNetwork = {
+      new SocialNetwork(persons - name)
     }
+
     def addFriend(namePerson: String, nameFriend: String): SocialNetwork = {
       if (persons.contains(nameFriend)) {
         new SocialNetwork(persons
           .updated(namePerson, persons(namePerson) + nameFriend)
           .updated(nameFriend, persons(nameFriend) + namePerson)
         )
-      } else {
-        new SocialNetwork(persons
-          .updated(namePerson, persons(namePerson) + nameFriend) + (nameFriend -> Set(namePerson))
-        )
-      }
+      } else new SocialNetwork(persons.updated(namePerson, persons(namePerson) + nameFriend) + (nameFriend -> Set(namePerson)))
     }
+
     def removeFriend(namePerson: String, nameFriend: String): SocialNetwork = {
       if (persons.contains(nameFriend)) {
         new SocialNetwork(persons
@@ -92,15 +90,20 @@ object Exercises extends App {
         this
       }
     }
+
     def numberOfFriends(name: String): Int = persons(name).size
+
     def mostFriends(): (String, Set[String]) = persons.maxBy(_._2.size)
+
     def countOfNoFriends(): Int = persons.count(_._2.isEmpty)
+
     def socialNoDirectConnection(person1: String, person2: String): Boolean = {
       if (persons(person1).contains(person2)) true
       else {
         persons(person1).forall(p => socialNoDirectConnection(p, person2))
       }
     }
+
     def socialConnection(person1: String, person2: String, links: Map[String, Set[String]] = persons): (Boolean, Boolean) = {
       if (persons(person2).isEmpty) (false, false)
       else if (persons(person1).contains(person2) && links == persons) (true, true)
@@ -108,34 +111,25 @@ object Exercises extends App {
       else {
         val newLinks = links - person1
         var flag = false
-        for (p <- persons(person1)){
-          if (newLinks.contains(p)) {
-            if (socialConnection(p, person2, newLinks)._1) flag = true
-          }
-        }
+        for (
+          p <- persons(person1)
+          if newLinks.contains(p) && socialConnection(p, person2, newLinks)._1
+        ) yield flag = true
         (flag, false)
       }
     }
   }
 
   // Testing Social network
-  val socNet = new SocialNetwork()
-    .addPerson("Sasha")
-    .addPerson("Denis")
-    .addPerson("Petr")
-    .addPerson("Artem")
-    .addPerson("Mishail")
-    .addPerson("Anton")
-    .addPerson("Oleg")
-    .addPerson("Andrew")
-    .addPerson("Pavel")
-    .addFriend("Sasha", "Denis")
-    .addFriend("Sasha", "Petr")
-    .addFriend("Sasha", "Artem")
-    .addFriend("Artem", "Mishail")
+  val names: Seq[String] = Seq("Sasha", "Denis", "Petr", "Artem", "Mishail", "Anton", "Oleg", "Andrew", "Pavel")
+  val sashaFriends: Seq[String] = Seq("Denis", "Petr", "Artem")
+  val socNetInit = names.foldLeft(new SocialNetwork())((a, s) => a.addPerson(s))
+  val addSashaFriends = sashaFriends.foldLeft(socNetInit)((a, s) => a.addFriend("Sasha", s))
+  val addOtherFriends = addSashaFriends.addFriend("Artem", "Mishail")
     .addFriend("Mishail", "Anton")
-  println(socNet.socialConnection("Sasha", "Anton"))
-  println(socNet.mostFriends())
-  println(socNet.countOfNoFriends())
+
+  println(addOtherFriends.socialConnection("Sasha", "Anton"))
+  println(addOtherFriends.mostFriends())
+  println(addOtherFriends.countOfNoFriends())
 
 }
