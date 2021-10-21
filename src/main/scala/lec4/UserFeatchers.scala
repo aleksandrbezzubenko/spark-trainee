@@ -43,7 +43,6 @@ object UserFeatchers {
     val lastResolutions = resolutionsDtDF
       .withColumn("lead", lead("resolution",1).over(windowSpec))
       .filter(col("lead").isNull).drop("lead")
-    println("successes")
 
     val gettersCount = udf { arr: mutable.WrappedArray[String] =>
       arr.distinct.map(e => e -> arr.count(_ == e)).toMap
